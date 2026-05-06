@@ -1,0 +1,24 @@
+{
+    "name": "RAG DevContainer",
+    "image": "python:3.11",
+    "features":{
+            "./features/poetry_install": {}
+        },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                //python extensions
+                "ms-python.python",
+                "ms-python.black-formatter",
+                "ms-python.isort",
+                "ms-python.vscode-pylance",
+                "donjayamanne.python-extension-pack",
+                "ms-toolsai.jupyter",
+                //formatting
+                "esbenp.prettier-vscode",
+                //ci/cd
+                "github.vscode-github-actions"
+            ]
+       }
+    }
+}
