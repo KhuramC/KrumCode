@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "KrumRAG"
+version = "0.1.0"
+description = "RAG with all course materials."
+readme = "README.md"
+packages = [
+    {include = "core" },
+    {include = "pipelines" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+chromadb = "^1.5.9"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+pytest-asyncio = "^0.23.8"
+pytest-cov = "^3.0"
+pytest-benchmark = "^4.0.0"
+
+# for doing testing with jupyter notebooks
+ipywidgets = "^8.1.0"
+jupyter = "^1.1.1"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
