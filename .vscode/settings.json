@@ -1,0 +1,13 @@
+{
+  // --- Docstring Automation ---
+  "autoDocstring.docstringFormat": "google",
+  "autoDocstring.generateDocstringOnEnter": true,
+  "autoDocstring.guessTypes": true, // include type hints
+
+  // --- Type Hinting & Analysis (Pylance) ---
+  "python.analysis.typeCheckingMode": "standard",
+  "python.analysis.inlayHints.functionReturnTypes": true,
+  "python.analysis.inlayHints.variableTypes": true,
+
+  "editor.formatOnSave": true
+}
