@@ -1,0 +1,4 @@
+.venv
+repos.txt
+data/
+**/__pycache__/
