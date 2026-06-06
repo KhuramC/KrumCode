@@ -1,48 +1,51 @@
 from pathlib import Path
-import configparser
-
-# Default Configuration
-DEFAULT_REPO_FILE = "./repos.txt"  # File containing list of repo URLS
-DEFAULT_DEST_DIR = "./data/repos"  # Directory where repos will be cloned or updated
+from typing import Any
+import yaml
 
 
-def get_project_root() -> Path:
+def get_backend_root() -> Path:
     """
-    Returns the path to the project root.
+    Returns the path to the backend root.
 
     Returns:
-        Path: path to project root.
+        Path: path to backend root.
     """
 
-    # .parent goes up to the 'core' folder, and the second .parent goes up to the root.
+    # .parent goes up to the 'core' folder, and the second .parent goes up to the root of the backend.
     return Path(__file__).resolve().parent.parent
 
 
-def load_config() -> configparser.ConfigParser:
+def load_config() -> dict[str, Any]:
     """
-    Loads the configuration from the file specified in the project root.
+    Loads the configuration from the YAML file specified in the backend root.
 
     Raises:
-        FileNotFoundError: If the config file is not found in the project root.
+        FileNotFoundError: If the config file is not found in the backend root.
+        ValueError: If the config file is empty.
 
     Returns:
-        configparser.ConfigParser: The loaded configuration parser.
+        dict[str, Any]: The loaded configuration.
     """
 
-    config = configparser.ConfigParser()
-    config_path = get_project_root() / "config.cfg"
-    if config.read(config_path):
-        return config
-    raise FileNotFoundError("Config file not found.")
+    config_path: Path = get_backend_root() / "config.yaml"
+    try:
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f)
+            if config is None:
+                raise ValueError("Config file 'config.yaml' is empty.")
+            return config
+    except FileNotFoundError:
+        raise FileNotFoundError("Config file 'config.yaml' not found.")
 
 
-def get_repo_file(config: configparser.ConfigParser) -> Path:
-    return get_project_root() / config.get(
-        "Paths", "REPO_FILE", fallback=DEFAULT_REPO_FILE
-    )
+def get_paths(config: dict[str, Any]) -> dict[str, Path]:
+    path_config = config.get("Paths")
+    new_path_config = {}
+    for path_name, path_value in path_config.items():
+        new_path_config[path_name] = Path(path_value)
+        
+    return new_path_config
 
 
-def get_dest_dir(config: configparser.ConfigParser) -> Path:
-    return get_project_root() / config.get(
-        "Paths", "DEST_DIR", fallback=DEFAULT_DEST_DIR
-    )
+def get_llm_config(config: dict[str, Any]) -> dict[str, Any]:
+    return config.get("LLM")

@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import chromadb
 
 # LlamaIndex Core
@@ -19,18 +20,18 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
-# Import your existing config logic
-from core.config_loader import load_config, get_dest_dir, DEFAULT_DEST_DIR
+from core.config_loader import load_config, get_backend_root, get_paths, get_llm_config
 
 
-def build_index():
+def build_index() -> None:
     # 1. Load directory paths using your config_loader
     try:
         config = load_config()
-        dest_dir = get_dest_dir(config)
-    except FileNotFoundError:
-        print("Config file not found. Using default paths.")
-        dest_dir = Path(DEFAULT_DEST_DIR)
+        paths: dict[str, Path] = get_paths(config)
+        llm_config = get_llm_config(config)
+    except FileNotFoundError or ValueError:
+        print("Config file not found or empty. Exiting...")
+        exit(1)
 
     # 2. Configure Global Settings to point to your WSL Host!
     print("Connecting to local WSL AI models...")
@@ -41,8 +42,8 @@ def build_index():
     )
     Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
-    # 3. Setup the Chroma Vector Database
-    db_path = dest_dir.parent / "chroma_db"
+    # Setup the Chroma Vector Database
+    db_path: Path = get_backend_root() / paths["DATABASE_DIR"]
     db_path.mkdir(parents=True, exist_ok=True)
 
     # create db file
@@ -54,10 +55,11 @@ def build_index():
     # create storage context for LlamaIndex
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-    # 4. Load C++ Documents from the synced repos
-    print(f"Loading documents from {dest_dir}...")
+    # Load documents from the synced repos
+    repo_dir: Path = paths["DEST_DIR"]
+    print(f"Loading documents from {repo_dir} ...")
     reader = SimpleDirectoryReader(
-        input_dir=str(dest_dir),
+        input_dir=str(repo_dir),
         recursive=True,
         required_exts=[".cpp", ".hpp", ".c", ".h"],
     )
