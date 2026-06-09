@@ -1,44 +1,86 @@
 from pathlib import Path
 import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
+from core.config_loader import load_config
 
-from core.config_loader import load_config, get_paths
+
+@dataclass
+class RepoSyncResult:
+    repo_name: str
+    success: bool
+    changed_files: list[str] = field(default_factory=list)
+    error: str | None = None
 
 
-# Reads in and syncs repositories listed in the specified file into the specified directory.
-def sync_repos() -> None:
+def sync_single_repo(repo_url: str, dest_dir: Path) -> RepoSyncResult:
+    repo_name = repo_url.split("/")[-1].replace(".git", "")
+    repo_path = dest_dir / repo_name
 
     try:
-        paths: dict[str, Path] = get_paths(load_config())
-        repo_file_path: Path = paths["REPO_FILE"]
-        destination_dir: Path = paths["DEST_DIR"]
+        if repo_path.exists():
+            subprocess.run(["git", "pull"], cwd=repo_path, check=True)
+            result = subprocess.run(
+                ["git", "diff", "--name-only", "HEAD@{1}", "HEAD"],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            changed_files = [
+                str(repo_path / f) for f in result.stdout.splitlines() if f.strip()
+            ]
+        else:
+            subprocess.run(["git", "clone", repo_url], cwd=dest_dir, check=True)
+            # Everything is new, so all files are "changed"
+            changed_files = [str(p) for p in repo_path.rglob("*") if p.is_file()]
 
-    except FileNotFoundError or ValueError:
+        return RepoSyncResult(
+            repo_name=repo_name, success=True, changed_files=changed_files
+        )
+
+    except subprocess.CalledProcessError as e:
+        return RepoSyncResult(repo_name=repo_name, success=False, error=str(e))
+
+
+def sync_repos() -> list[RepoSyncResult]:
+    """
+    Finds the file with the repos to be used for the model and clones/updates the repos accordingly
+    into the specified directory.
+    """
+
+    try:
+        config = load_config()
+        paths = config.Paths
+    except (FileNotFoundError, ValueError):
         print("Config file not found. Exiting...")
         exit(1)
 
-    # Create directory and get individual repos
-    destination_dir.mkdir(parents=True, exist_ok=True)
-    repos: list[str] = [
-        line.strip() for line in repo_file_path.read_text().splitlines() if line.strip()
+    paths.repo_dest_dir.mkdir(parents=True, exist_ok=True)
+    repos = [
+        line.strip()
+        for line in paths.repo_file_path.read_text().splitlines()
+        if line.strip()
     ]
 
-    # TODO: Error handling for repo_url + git operations + parallelization?
-    for repo_url in repos:
-        # Extract the repo name from the URL
-        repo_name: str = repo_url.split("/")[-1].replace(".git", "")
+    results: list[RepoSyncResult] = []
+    with ThreadPoolExecutor() as executor:
+        futures = {
+            executor.submit(sync_single_repo, url, paths.repo_dest_dir): url
+            for url in repos
+        }
+        for future in as_completed(futures):
+            result = future.result()
+            if result.success:
+                print(
+                    f"Succesffully synced {result.repo_name} ({len(result.changed_files)} changed files)"
+                )
+            else:
+                print(f"Failed to sync {result.repo_name}: {result.error}")
+            results.append(result)
 
-        repo_path: Path = destination_dir / repo_name
-
-        if repo_path.exists():
-            print(f"Updating existing repo: {repo_name}")
-            # Run 'git pull' inside the existing directory
-            subprocess.run(["git", "pull"], cwd=repo_path, check=True)
-        else:
-            print(f"Cloning new repo: {repo_name}")
-            # Run 'git clone' in the destination directory
-            subprocess.run(["git", "clone", repo_url], cwd=destination_dir, check=True)
-
-    print("All repositories have been synced successfully!")
+    print("Sync complete.")
+    return results
 
 
 if __name__ == "__main__":
