@@ -20,5 +20,13 @@
         "github.vscode-github-actions"
       ]
     }
-  }
+  },
+  // to ensure local ssh keys available in devcontainer
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/ssh-agent.sock"
+  },
+  "mounts": [
+    "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent.sock,type=bind",
+    "source=${localEnv:HOME}/.ssh/known_hosts,target=/root/.ssh/known_hosts,type=bind,consistency=cached"
+  ]
 }
