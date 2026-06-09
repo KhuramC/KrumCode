@@ -1,7 +1,8 @@
 Paths:
-  REPO_FILE: "./repos.txt" # file containing list of repos to clone
-  DEST_DIR: "./data/repos" # directory where repos will be cloned
-  DATABASE_DIR: "./data/database" # directory for vector database storage
+  # Paths should be relative to the root of the backend.
+  repo_file_path: "./repos.txt" # file containing list of repos to clone
+  repo_dest_dir: "./data/repos" # directory where repos will be cloned
+  database_dir: "./data/database" # directory for vector database storage
 
 # Backend:
 #   host: "0.0.0.0"
@@ -9,6 +10,5 @@ Paths:
 #   environment: "development"
 
 LLM:
-  provider: "openai" # e.g., openai, anthropic, ollama, local
-  model_name: "gpt-4o"
-  requires_api_key: true
+  provider: "groq"
+  model_name: "qwen/qwen3-32b"
