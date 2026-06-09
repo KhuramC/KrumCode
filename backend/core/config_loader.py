@@ -1,6 +1,42 @@
 from pathlib import Path
-from typing import Any
 import yaml
+from enum import StrEnum
+from pydantic import BaseModel, FilePath, model_validator, ValidationError
+from dotenv import load_dotenv
+
+
+class PathsConfig(BaseModel):
+    repo_file_path: Path
+    repo_dest_dir: Path
+    database_dir: Path
+
+
+class LLMProvider(StrEnum):
+    GOOGLE = "google"
+    OPENAI = "openai"
+    # ANTHROPIC= "anthropic"
+    GROQ = "groq"
+    # LOCAL = "local"
+
+    @property
+    def base_url(self) -> str:
+        match self:
+            case LLMProvider.GOOGLE:
+                return "https://generativelanguage.googleapis.com/v1beta/openai"
+            case LLMProvider.OPENAI:
+                return "https://api.openai.com/v1"
+            case LLMProvider.GROQ:
+                return "https://api.groq.com/openai/v1"
+
+
+class LLMConfig(BaseModel):
+    provider: LLMProvider
+    model_name: str
+
+
+class OverallConfig(BaseModel):
+    Paths: PathsConfig
+    LLM: LLMConfig
 
 
 def get_backend_root() -> Path:
@@ -8,44 +44,39 @@ def get_backend_root() -> Path:
     Returns the path to the backend root.
 
     Returns:
-        Path: path to backend root.
+        Path: Path to backend root.
     """
 
     # .parent goes up to the 'core' folder, and the second .parent goes up to the root of the backend.
     return Path(__file__).resolve().parent.parent
 
 
-def load_config() -> dict[str, Any]:
+def load_environment() -> None:
+    """
+    Loads the environment variables.
+    """
+    load_dotenv(dotenv_path=get_backend_root() / ".env")
+
+
+def load_config() -> OverallConfig:
     """
     Loads the configuration from the YAML file specified in the backend root.
 
     Raises:
         FileNotFoundError: If the config file is not found in the backend root.
-        ValueError: If the config file is empty.
+        ValueError: If the config file is not configured to the specifications above.
 
     Returns:
-        dict[str, Any]: The loaded configuration.
+        OverallConfig: The loaded configuration.
     """
+    # load env variables
+    load_environment()
 
     config_path: Path = get_backend_root() / "config.yaml"
+    if not config_path.is_file():
+        raise FileNotFoundError(f"Config file 'config.yaml' not found at {config_path}")
+    raw_config = yaml.safe_load(config_path.read_text()) or {}
     try:
-        with open(config_path, "r") as f:
-            config = yaml.safe_load(f)
-            if config is None:
-                raise ValueError("Config file 'config.yaml' is empty.")
-            return config
-    except FileNotFoundError:
-        raise FileNotFoundError("Config file 'config.yaml' not found.")
-
-
-def get_paths(config: dict[str, Any]) -> dict[str, Path]:
-    path_config = config.get("Paths")
-    new_path_config = {}
-    for path_name, path_value in path_config.items():
-        new_path_config[path_name] = Path(path_value)
-        
-    return new_path_config
-
-
-def get_llm_config(config: dict[str, Any]) -> dict[str, Any]:
-    return config.get("LLM")
+        return OverallConfig(**raw_config)
+    except ValidationError as e:
+        raise ValueError(f"Configuration file is incorrectly configured: {e}")
