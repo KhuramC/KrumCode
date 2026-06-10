@@ -1,10 +1,11 @@
 Paths:
   # Paths should be relative to the root of the backend.
-  repo_file_path: "./repos.txt" # file containing list of repos to clone
-  repo_dest_dir: "./data/repos" # directory where repos will be cloned
-  database_dir: "./data/database" # directory for vector database storage
+  repo_list_path: "./repos.txt"
+  repo_dest_dir: "./data/repos"
+  database_dir: "./data/database"
+  environment: "./.env"
 
-# Backend:
+# API:
 #   host: "0.0.0.0"
 #   port: 8000
 #   environment: "development"

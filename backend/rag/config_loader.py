@@ -6,9 +6,10 @@ from dotenv import load_dotenv
 
 
 class PathsConfig(BaseModel):
-    repo_file_path: Path
+    repo_list_path: Path
     repo_dest_dir: Path
     database_dir: Path
+    environment: Path
 
 
 class LLMProvider(StrEnum):
@@ -39,6 +40,9 @@ class OverallConfig(BaseModel):
     LLM: LLMConfig
 
 
+config: OverallConfig | None = None
+
+
 def get_backend_root() -> Path:
     """
     Returns the path to the backend root.
@@ -51,11 +55,11 @@ def get_backend_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
-def load_environment() -> None:
+def load_environment(paths: PathsConfig) -> None:
     """
     Loads the environment variables.
     """
-    load_dotenv(dotenv_path=get_backend_root() / ".env")
+    load_dotenv(dotenv_path=get_backend_root() / paths.environment)
 
 
 def load_config() -> OverallConfig:
@@ -69,14 +73,20 @@ def load_config() -> OverallConfig:
     Returns:
         OverallConfig: The loaded configuration.
     """
-    # load env variables
-    load_environment()
+    global config
+    if config is None:
 
-    config_path: Path = get_backend_root() / "config.yaml"
-    if not config_path.is_file():
-        raise FileNotFoundError(f"Config file 'config.yaml' not found at {config_path}")
-    raw_config = yaml.safe_load(config_path.read_text()) or {}
-    try:
-        return OverallConfig(**raw_config)
-    except ValidationError as e:
-        raise ValueError(f"Configuration file is incorrectly configured: {e}")
+        config_path: Path = get_backend_root() / "config.yaml"
+        if not config_path.is_file():
+            raise FileNotFoundError(
+                f"Config file 'config.yaml' not found at {config_path}"
+            )
+        raw_config = yaml.safe_load(config_path.read_text()) or {}
+        try:
+            config = OverallConfig(**raw_config)
+            load_environment(config.Paths)
+            return config
+        except ValidationError as e:
+            raise ValueError(f"Configuration file is incorrectly configured: {e}")
+    else:
+        return config

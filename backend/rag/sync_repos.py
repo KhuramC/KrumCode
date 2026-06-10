@@ -59,7 +59,7 @@ def sync_repos() -> list[RepoSyncResult]:
     paths.repo_dest_dir.mkdir(parents=True, exist_ok=True)
     repos = [
         line.strip()
-        for line in paths.repo_file_path.read_text().splitlines()
+        for line in paths.repo_list_path.read_text().splitlines()
         if line.strip()
     ]
 
