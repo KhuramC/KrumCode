@@ -1,7 +1,7 @@
 ---
 name: RAG Issue
 about: Tickets for the RAG Model
-title: ":robot: Integrate ??? "
+title: ":robot: Implement ??? "
 assignees: ""
 projects:
   - project: "RAG Model"
