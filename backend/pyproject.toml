@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "KrumRAG"
+name = "KrumKode"
 version = "0.1.0"
-description = "RAG with all course materials."
+description = "RAG"
 readme = "README.md"
 packages = [
-    {include = "core" }
-    # {include = "pipelines" },
+    {include = "rag" },
+    # {include = "api" }
 ]
 
 [tool.poetry.dependencies]

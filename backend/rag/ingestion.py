@@ -15,9 +15,9 @@ from llama_index.core.schema import BaseNode
 from llama_index.core.node_parser import CodeSplitter
 from tree_sitter_languages import get_parser
 
-from core.config_loader import load_config, get_backend_root
-from core.sync_repos import sync_repos
-from core.splitters import FileSplitter
+from rag.config_loader import load_config, get_backend_root
+from rag.sync_repos import sync_repos
+from rag.splitters import FileSplitter
 
 
 def ingest_file(file_path: Path) -> list[BaseNode] | None:

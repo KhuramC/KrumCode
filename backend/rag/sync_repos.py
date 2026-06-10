@@ -2,7 +2,7 @@ from pathlib import Path
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from core.config_loader import load_config
+from rag.config_loader import load_config
 
 
 @dataclass

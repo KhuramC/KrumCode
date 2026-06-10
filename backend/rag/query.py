@@ -8,10 +8,10 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai_like import OpenAILike
 
 
-from core.config_loader import load_config, get_backend_root
+from rag.config_loader import load_config, get_backend_root
 
 
-def query_codebase():
+def query_RAG():
     try:
         config = load_config()
         paths = config.Paths
@@ -29,7 +29,7 @@ def query_codebase():
         is_chat_model=True,
     )
     Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
-  
+
     print("Connecting to the database...")
     chroma_client = chromadb.PersistentClient(path=str(db_path))
     # We use get_collection here because we assume it was already created during ingestion
@@ -66,4 +66,4 @@ def query_codebase():
 
 
 if __name__ == "__main__":
-    query_codebase()
+    query_RAG()
