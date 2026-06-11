@@ -8,12 +8,12 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai_like import OpenAILike
 
 
-from rag.config_loader import load_config, get_backend_root
+from rag.config_loader import get_config, get_backend_root
 
 
 def query_RAG():
     try:
-        config = load_config()
+        config = get_config()
         paths = config.Paths
         llm_config = config.LLM
     except (FileNotFoundError, ValueError):

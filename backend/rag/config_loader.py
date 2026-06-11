@@ -23,9 +23,9 @@ class LLMProvider(StrEnum):
 
     GOOGLE = "google"
     OPENAI = "openai"
-    # ANTHROPIC= "anthropic"
+    ANTHROPIC = "anthropic"
     GROQ = "groq"
-    # LOCAL = "local"
+    LOCAL = "local"
 
     @property
     def base_url(self) -> str:
@@ -34,8 +34,15 @@ class LLMProvider(StrEnum):
                 return "https://generativelanguage.googleapis.com/v1beta/openai"
             case LLMProvider.OPENAI:
                 return "https://api.openai.com/v1"
+            case LLMProvider.ANTHROPIC:
+                # TODO: look into edge case with anthropic with the API
+                return ""
             case LLMProvider.GROQ:
                 return "https://api.groq.com/openai/v1"
+            case LLMProvider.LOCAL:
+                # TODO: add extra thing in config for the url for local LLMs.
+                # test with ollama?
+                return ""
 
 
 class LLMConfig(BaseModel):
@@ -54,10 +61,6 @@ class OverallConfig(BaseModel):
 
     Paths: PathsConfig
     LLM: LLMConfig
-
-
-# global config instance
-config: OverallConfig | None = None
 
 
 def get_backend_root() -> Path:
@@ -81,6 +84,34 @@ def load_environment(paths: PathsConfig) -> None:
 
 def load_config() -> OverallConfig:
     """
+    Loads the configuration from the YAML file specified in the backend root.
+
+    Raises:
+        FileNotFoundError: If the config file is not found in the backend root.
+        ValueError: If the config file is not configured to the specifications above.
+
+    Returns:
+        OverallConfig: The loaded configuration.
+    """
+
+    config_path: Path = get_backend_root() / "config.yaml"
+    if not config_path.is_file():
+        raise FileNotFoundError(f"Config file 'config.yaml' not found at {config_path}")
+    raw_config = yaml.safe_load(config_path.read_text()) or {}
+    try:
+        config = OverallConfig(**raw_config)
+        load_environment(config.Paths)
+        return config
+    except ValidationError as e:
+        raise ValueError(f"Configuration file is incorrectly configured: {e}") from None
+
+
+# global config instance
+config: OverallConfig | None = load_config()
+
+
+def get_config() -> OverallConfig:
+    """
     Loads/returns the configuration from the YAML file specified in the backend root.
 
     Raises:
@@ -92,20 +123,6 @@ def load_config() -> OverallConfig:
     """
     global config
     if config is None:
-
-        config_path: Path = get_backend_root() / "config.yaml"
-        if not config_path.is_file():
-            raise FileNotFoundError(
-                f"Config file 'config.yaml' not found at {config_path}"
-            )
-        raw_config = yaml.safe_load(config_path.read_text()) or {}
-        try:
-            config = OverallConfig(**raw_config)
-            load_environment(config.Paths)
-            return config
-        except ValidationError as e:
-            raise ValueError(
-                f"Configuration file is incorrectly configured: {e}"
-            ) from None
+        return load_config()
     else:
         return config

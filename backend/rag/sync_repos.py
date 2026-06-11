@@ -2,7 +2,7 @@ from pathlib import Path
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from rag.config_loader import load_config
+from rag.config_loader import get_config
 
 
 @dataclass
@@ -78,7 +78,7 @@ def sync_repos() -> list[RepoSyncResult]:
     """
 
     try:
-        config = load_config()
+        config = get_config()
         paths = config.Paths
     except (FileNotFoundError, ValueError):
         print("Config file not found. Exiting...")
