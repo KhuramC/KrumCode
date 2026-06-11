@@ -108,12 +108,12 @@ def load_config() -> OverallConfig:
 
 
 # global config instance
-config: OverallConfig | None = load_config()
+_config: OverallConfig | None = load_config()
 
 
 def get_config() -> OverallConfig:
     """
-    Loads/returns the configuration from the YAML file specified in the backend root.
+    Loads the configuration from the YAML file specified in the backend root.
 
     Raises:
         FileNotFoundError: If the config file is not found in the backend root.
@@ -122,8 +122,7 @@ def get_config() -> OverallConfig:
     Returns:
         OverallConfig: The loaded configuration.
     """
-    global config
-    if config is None:
+    if _config is None:
         return load_config()
     else:
-        return config
+        return _config
