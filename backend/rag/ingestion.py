@@ -1,23 +1,22 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
-from llama_index.llms.openai_like import OpenAILike
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 import chromadb
-from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import (
-    SimpleDirectoryReader,
-    VectorStoreIndex,
-    StorageContext,
     Settings,
+    SimpleDirectoryReader,
+    StorageContext,
+    VectorStoreIndex,
 )
-from llama_index.core.schema import BaseNode
 from llama_index.core.node_parser import CodeSplitter
-from tree_sitter_languages import get_parser
-
-from rag.config_loader import get_config, get_backend_root
-from rag.sync_repos import sync_repos
+from llama_index.core.schema import BaseNode
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.llms.openai_like import OpenAILike
+from llama_index.vector_stores.chroma import ChromaVectorStore
+from rag.config_loader import get_backend_root, get_config
 from rag.splitters import FileSplitter
+from rag.sync_repos import sync_repos
+from tree_sitter_languages import get_parser
 
 
 def ingest_file(file_path: Path) -> list[BaseNode] | None:

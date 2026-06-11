@@ -1,14 +1,12 @@
-from pathlib import Path
-import chromadb
 import os
+from pathlib import Path
 
-from llama_index.core import VectorStoreIndex, Settings
-from llama_index.vector_stores.chroma import ChromaVectorStore
+import chromadb
+from llama_index.core import Settings, VectorStoreIndex
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai_like import OpenAILike
-
-
-from rag.config_loader import get_config, get_backend_root
+from llama_index.vector_stores.chroma import ChromaVectorStore
+from rag.config_loader import get_backend_root, get_config
 
 
 def query_RAG():

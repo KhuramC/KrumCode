@@ -1,8 +1,9 @@
-from pathlib import Path
-import yaml
 from enum import StrEnum
-from pydantic import BaseModel, FilePath, ValidationError
+from pathlib import Path
+
+import yaml
 from dotenv import load_dotenv
+from pydantic import BaseModel, FilePath, ValidationError
 
 
 class PathsConfig(BaseModel):

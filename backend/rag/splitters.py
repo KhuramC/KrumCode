@@ -1,7 +1,8 @@
-from llama_index.core.node_parser import NodeParser, CodeSplitter
-from tree_sitter_languages import get_parser
 from dataclasses import dataclass
 from enum import Enum
+
+from llama_index.core.node_parser import CodeSplitter, NodeParser
+from tree_sitter_languages import get_parser
 
 
 @dataclass
