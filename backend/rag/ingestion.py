@@ -8,7 +8,6 @@ from llama_index.core import (
     StorageContext,
     VectorStoreIndex,
 )
-from llama_index.core.node_parser import CodeSplitter
 from llama_index.core.schema import BaseNode
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai_like import OpenAILike
@@ -16,10 +15,18 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from rag.config_loader import get_backend_root, get_config
 from rag.splitters import FileSplitter
 from rag.sync_repos import sync_repos
-from tree_sitter_languages import get_parser
 
 
 def ingest_file(file_path: Path) -> list[BaseNode] | None:
+    """
+    Ingests a file and chunks it into pieces.
+
+    Args:
+        file_path (Path): Path to the file to be chunked.
+
+    Returns:
+        list[BaseNode] | None: A list of chunks or nothing if the file can't be ingested.
+    """
     config = next(
         (
             split_config.value
@@ -37,6 +44,9 @@ def ingest_file(file_path: Path) -> list[BaseNode] | None:
 
 
 def ingest_repos() -> None:
+    """
+    Attempts to ingest all the wanted repos (after syncing) and index into a database.
+    """
     try:
         config = get_config()
         paths = config.Paths
