@@ -72,7 +72,7 @@ def sync_single_repo(repo_url: str, dest_dir: Path) -> RepoSyncResult:
 def sync_repos() -> list[RepoSyncResult]:
     """
     Finds the file with the repos to be used for the model and clones/updates the repos accordingly
-    into the specified directory.
+    into the specified directory. This is multithreaded.
 
     Returns:
         list[RepoSyncResult]: results of syncing for each repo.
