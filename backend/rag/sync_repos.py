@@ -7,19 +7,44 @@ from rag.config_loader import load_config
 
 @dataclass
 class RepoSyncResult:
+    """Result of syncing the local repo with the remote."""
+
     repo_name: str
     success: bool
-    changed_files: list[str] = field(default_factory=list)
-    error: str | None = None
+    changed_files: list[str] = field(
+        default_factory=list
+    )  # absolute paths of edited/added
+    error: str | None = None  # only exists if success is false
+    already_synced: bool = False  # no files were changed if true
 
 
 def sync_single_repo(repo_url: str, dest_dir: Path) -> RepoSyncResult:
+    """
+    Clones/updates a repo into a specified directory.
+
+    Args:
+        repo_url (str): URL of the remote repository.
+        dest_dir (Path): The directory to sync the the repo into.
+
+    Returns:
+        RepoSyncResult: The result of syncing
+    """
     repo_name = repo_url.split("/")[-1].replace(".git", "")
     repo_path = dest_dir / repo_name
 
     try:
         if repo_path.exists():
-            subprocess.run(["git", "pull"], cwd=repo_path, check=True)
+            pull_result = subprocess.run(
+                ["git", "pull"],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            if "Already up to date." in pull_result.stdout:
+                return RepoSyncResult(
+                    repo_name=repo_name, success=True, already_synced=True
+                )
             result = subprocess.run(
                 ["git", "diff", "--name-only", "HEAD@{1}", "HEAD"],
                 cwd=repo_path,
@@ -47,6 +72,9 @@ def sync_repos() -> list[RepoSyncResult]:
     """
     Finds the file with the repos to be used for the model and clones/updates the repos accordingly
     into the specified directory.
+
+    Returns:
+        list[RepoSyncResult]: results of syncing for each repo.
     """
 
     try:
@@ -71,9 +99,11 @@ def sync_repos() -> list[RepoSyncResult]:
         }
         for future in as_completed(futures):
             result = future.result()
-            if result.success:
+            if result.already_synced:
+                print(f"{result.repo_name} already caught up.")
+            elif result.success:
                 print(
-                    f"Succesffully synced {result.repo_name} ({len(result.changed_files)} changed files)"
+                    f"Successfully synced {result.repo_name} ({len(result.changed_files)} changed files)"
                 )
             else:
                 print(f"Failed to sync {result.repo_name}: {result.error}")
