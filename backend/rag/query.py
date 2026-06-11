@@ -3,25 +3,25 @@ from pathlib import Path
 
 import chromadb
 from llama_index.core import Settings, VectorStoreIndex
+from llama_index.core.base.base_query_engine import BaseQueryEngine
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai_like import OpenAILike
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from utils.config_loader import get_backend_root, get_config
+from utils.config_loader import OverallConfig, get_backend_root, get_config
 
 
-def query_RAG():
+def initialize_query_engine(config: OverallConfig) -> BaseQueryEngine:
     """
-    Queries the RAG model using the LLM wanted.
-    """
-    try:
-        config = get_config()
-        paths = config.Paths
-        llm_config = config.LLM
-    except (FileNotFoundError, ValueError):
-        print("Config file not found or empty. Exiting...")
-        exit(1)
+    Initializes everything to be able to query with the RAG model.
 
-    db_path: Path = get_backend_root() / paths.database_dir
+    Args:
+        config (OverallConfig): The backend configuration
+
+    Returns:
+        BaseQueryEngine: a query engine to query with the RAG model.
+    """
+    paths = config.Paths
+    llm_config = config.LLM
 
     Settings.llm = OpenAILike(
         model=llm_config.model_name,
@@ -31,20 +31,29 @@ def query_RAG():
     )
     Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
+    db_path = get_backend_root() / paths.database_dir
     print("Connecting to the database...")
     chroma_client = chromadb.PersistentClient(path=str(db_path))
     # We use get_collection here because we assume it was already created during ingestion
     chroma_collection = chroma_client.get_collection("cpp_coursework")
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
-
-    # Load the index from the vector store
     index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
 
+    return index.as_query_engine(streaming=True, similarity_top_k=5)
+
+
+def query_RAG():
+    """
+    Queries the RAG model using the LLM wanted.
+    """
+    try:
+        config = get_config()
+    except (FileNotFoundError, ValueError):
+        print("Config file not found or empty. Exiting...")
+        exit(1)
+
     # Create a Query Engine
-    query_engine = index.as_query_engine(
-        streaming=True,  # Streams the output like ChatGPT
-        similarity_top_k=5,  # Fetches the top 5 most relevant chunks to answer your question
-    )
+    query_engine = initialize_query_engine(config)
 
     # Interactive Chat Loop
     print(
