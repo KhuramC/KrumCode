@@ -5,6 +5,7 @@ description = "RAG"
 readme = "README.md"
 packages = [
     {include = "rag" },
+    {include = "utils"},
     # {include = "api" }
 ]
 
