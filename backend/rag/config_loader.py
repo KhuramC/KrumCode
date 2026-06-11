@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 
 
 class PathsConfig(BaseModel):
+    """
+    The configuration for the necessary paths.
+    """
+
     repo_list_path: Path
     repo_dest_dir: Path
     database_dir: Path
@@ -13,6 +17,10 @@ class PathsConfig(BaseModel):
 
 
 class LLMProvider(StrEnum):
+    """
+    Supported LLM providers and their associated URLs for accessing their APIs.
+    """
+
     GOOGLE = "google"
     OPENAI = "openai"
     # ANTHROPIC= "anthropic"
@@ -31,15 +39,24 @@ class LLMProvider(StrEnum):
 
 
 class LLMConfig(BaseModel):
+    """
+    The configuration for the LLM.
+    """
+
     provider: LLMProvider
     model_name: str
 
 
 class OverallConfig(BaseModel):
+    """
+    The overall configuration for the RAG. Given by the YAML file.
+    """
+
     Paths: PathsConfig
     LLM: LLMConfig
 
 
+# global config instance
 config: OverallConfig | None = None
 
 
@@ -64,7 +81,7 @@ def load_environment(paths: PathsConfig) -> None:
 
 def load_config() -> OverallConfig:
     """
-    Loads the configuration from the YAML file specified in the backend root.
+    Loads/returns the configuration from the YAML file specified in the backend root.
 
     Raises:
         FileNotFoundError: If the config file is not found in the backend root.
