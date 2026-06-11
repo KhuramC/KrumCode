@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import chromadb
 from llama_index.core import Settings, VectorStoreIndex
@@ -42,7 +41,7 @@ def initialize_query_engine(config: OverallConfig) -> BaseQueryEngine:
     return index.as_query_engine(streaming=True, similarity_top_k=5)
 
 
-def query_RAG():
+def query_RAG() -> None:
     """
     Queries the RAG model using the LLM wanted.
     """
