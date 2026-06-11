@@ -6,10 +6,13 @@ from llama_index.core import Settings, VectorStoreIndex
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai_like import OpenAILike
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from rag.config_loader import get_backend_root, get_config
+from utils.config_loader import get_backend_root, get_config
 
 
 def query_RAG():
+    """
+    Queries the RAG model using the LLM wanted.
+    """
     try:
         config = get_config()
         paths = config.Paths

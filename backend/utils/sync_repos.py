@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from rag.config_loader import get_config
+from utils.config_loader import get_config
 
 
 @dataclass
