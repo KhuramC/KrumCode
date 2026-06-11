@@ -1,19 +1,19 @@
 from pathlib import Path
 import yaml
 from enum import StrEnum
-from pydantic import BaseModel, FilePath, model_validator, ValidationError
+from pydantic import BaseModel, FilePath, ValidationError
 from dotenv import load_dotenv
 
 
 class PathsConfig(BaseModel):
     """
-    The configuration for the necessary paths.
+    The configuration for the necessary paths. The files need to exist when loaded in. The directories do not.
     """
 
-    repo_list_path: Path
+    repo_list_path: FilePath
+    env_path: FilePath
     repo_dest_dir: Path
     database_dir: Path
-    environment: Path
 
 
 class LLMProvider(StrEnum):
@@ -76,7 +76,7 @@ def load_environment(paths: PathsConfig) -> None:
     """
     Loads the environment variables.
     """
-    load_dotenv(dotenv_path=get_backend_root() / paths.environment)
+    load_dotenv(dotenv_path=get_backend_root() / paths.env_path)
 
 
 def load_config() -> OverallConfig:
@@ -104,6 +104,8 @@ def load_config() -> OverallConfig:
             load_environment(config.Paths)
             return config
         except ValidationError as e:
-            raise ValueError(f"Configuration file is incorrectly configured: {e}")
+            raise ValueError(
+                f"Configuration file is incorrectly configured: {e}"
+            ) from None
     else:
         return config

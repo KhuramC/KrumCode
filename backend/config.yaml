@@ -1,9 +1,10 @@
 Paths:
   # Paths should be relative to the root of the backend.
   repo_list_path: "./repos.txt"
+  env_path: "./.env"
   repo_dest_dir: "./data/repos"
   database_dir: "./data/database"
-  environment: "./.env"
+  
 
 # API:
 #   host: "0.0.0.0"
