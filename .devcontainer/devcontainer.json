@@ -2,7 +2,10 @@
   "name": "RAG DevContainer",
   "image": "python:3.11",
   "features": {
-    "./features/poetry_install": {}
+    "./features/poetry_install": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
   },
   "customizations": {
     "vscode": {
@@ -17,7 +20,11 @@
         //formatting
         "esbenp.prettier-vscode",
         //ci/cd
-        "github.vscode-github-actions"
+        "github.vscode-github-actions",
+        //javascript extensions
+        "dbaeumer.vscode-eslint",
+        "rvest.vs-code-prettier-eslint",
+        "svelte.svelte-vscode"
       ]
     }
   },
