@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field, FilePath, ValidationError
 from pydantic.networks import IPvAnyAddress
 
+logger = logging.getLogger("utils")
+
 
 class PathsConfig(BaseModel):
     """
@@ -142,6 +144,7 @@ def load_config() -> OverallConfig:
     try:
         config = OverallConfig(**raw_config)
         load_environment(config.Paths)
+        configure_logging(config.Logging)
         return config
     except ValidationError as e:
         raise ValueError(f"Configuration file is incorrectly configured: {e}") from None

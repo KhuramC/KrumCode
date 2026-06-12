@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-logger = logging.getLogger("api.routes")
+logger = logging.getLogger("api.rest")
 
 router = APIRouter()
 

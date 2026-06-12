@@ -1,9 +1,12 @@
+import logging
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from .config_loader import get_config
+
+logger = logging.getLogger("utils.sync_repos")
 
 
 @dataclass
@@ -32,9 +35,11 @@ def sync_single_repo(repo_url: str, dest_dir: Path) -> RepoSyncResult:
     """
     repo_name = repo_url.split("/")[-1].replace(".git", "")
     repo_path = dest_dir / repo_name
+    logger.debug(f"Attempting to sync repo at path: {repo_path}")
 
     try:
         if repo_path.exists():
+            logger.info(f"Updating {repo_name}.")
             pull_result = subprocess.run(
                 ["git", "pull"],
                 cwd=repo_path,
@@ -56,10 +61,15 @@ def sync_single_repo(repo_url: str, dest_dir: Path) -> RepoSyncResult:
             changed_files = [
                 str(repo_path / f) for f in result.stdout.splitlines() if f.strip()
             ]
+            logger.debug(f"Changed files in {repo_name}: {', '.join(changed_files)}")
         else:
+            logger.info(f"Cloning {repo_name}.")
             subprocess.run(["git", "clone", repo_url], cwd=dest_dir, check=True)
             # Everything is new, so all files are "changed"
             changed_files = [str(p) for p in repo_path.rglob("*") if p.is_file()]
+            logger.debug(
+                f"Changed(actually new) files in {repo_name}: {', '.join(changed_files)}"
+            )
 
         return RepoSyncResult(
             repo_name=repo_name, success=True, changed_files=changed_files
@@ -91,6 +101,7 @@ def sync_repos() -> list[RepoSyncResult]:
         for line in paths.repo_list_path.read_text().splitlines()
         if line.strip()
     ]
+    logger.debug(f"Repos to sync: {', '.join(repos)}")
 
     results: list[RepoSyncResult] = []
     with ThreadPoolExecutor() as executor:
@@ -101,13 +112,13 @@ def sync_repos() -> list[RepoSyncResult]:
         for future in as_completed(futures):
             result = future.result()
             if result.already_synced:
-                print(f"{result.repo_name} already caught up.")
+                logger.info(f"{result.repo_name} already caught up.")
             elif result.success:
-                print(
+                logger.info(
                     f"Successfully synced {result.repo_name} ({len(result.changed_files)} changed files)"
                 )
             else:
-                print(f"Failed to sync {result.repo_name}: {result.error}")
+                logger.warning(f"Failed to sync {result.repo_name}: {result.error}")
             results.append(result)
 
     print("Sync complete.")
