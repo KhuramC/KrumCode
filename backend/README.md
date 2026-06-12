@@ -19,7 +19,13 @@ https://github.com/git/git.git
 
 Above is a valid example of the repository list, the list of repos the RAG will reference. The repo list is a TXT file of URLs that one can clone. Each line is a different URL. One needs to ensure they have access to the repository. For example, with private GitHub repositories, one needs put down the SSH URL and have an associated GitHub private key.
 
-### API(TODO)
+### API
+
+The API is pretty simple. The host is the IP address, the port is self-explanatory, and development changes things for production vs development.
+
+### Logging
+
+Logging is pretty simple. Each main part of the project (the API, the RAG, and the utilities) has its own levels of logging, based on the standard logging levels. Timestamps can be on there, but they don't need to be.
 
 ### Embedding(TODO)
 
