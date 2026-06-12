@@ -1,3 +1,4 @@
+import logging
 import os
 
 import chromadb
@@ -7,6 +8,8 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai_like import OpenAILike
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from utils.config_loader import OverallConfig, get_backend_root, get_config
+
+logger = logging.getLogger("rag.query")
 
 
 def initialize_query_engine(config: OverallConfig) -> BaseQueryEngine:
@@ -31,8 +34,9 @@ def initialize_query_engine(config: OverallConfig) -> BaseQueryEngine:
     Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
     db_path = get_backend_root() / paths.database_dir
-    print("Connecting to the database...")
+    
     chroma_client = chromadb.PersistentClient(path=str(db_path))
+    logger.info("Connected to the database successfully.")
     # We use get_collection here because we assume it was already created during ingestion
     chroma_collection = chroma_client.get_collection("cpp_coursework")
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
