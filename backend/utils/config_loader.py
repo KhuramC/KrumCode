@@ -1,9 +1,10 @@
 from enum import StrEnum
 from pathlib import Path
+from typing import Annotated
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, FilePath, ValidationError, conint
+from pydantic import BaseModel, Field,  FilePath, ValidationError
 from pydantic.networks import IPvAnyAddress
 
 
@@ -62,7 +63,7 @@ class ServerConfig(BaseModel):
     """
 
     host: IPvAnyAddress
-    port: conint(ge=1, le=65535)
+    port: Annotated[int, Field(ge=1, le=65535)]
     development: bool  # whether to deploy for development or not.
 
 
@@ -120,7 +121,7 @@ def load_config() -> OverallConfig:
 
 
 # global config instance
-_config: OverallConfig | None = load_config()
+_config: OverallConfig | None = None
 
 
 def get_config() -> OverallConfig:

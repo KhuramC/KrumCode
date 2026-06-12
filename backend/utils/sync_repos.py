@@ -81,8 +81,8 @@ def sync_repos() -> list[RepoSyncResult]:
     try:
         config = get_config()
         paths = config.Paths
-    except (FileNotFoundError, ValueError):
-        print("Config file not found. Exiting...")
+    except (FileNotFoundError, ValueError) as e:
+        print(f"{e}. \nExiting...")
         exit(1)
 
     paths.repo_dest_dir.mkdir(parents=True, exist_ok=True)

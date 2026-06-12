@@ -51,8 +51,8 @@ def ingest_repos() -> None:
         config = get_config()
         paths = config.Paths
         llm_config = config.LLM
-    except (FileNotFoundError, ValueError):
-        print("Config file not found or empty. Exiting...")
+    except (FileNotFoundError, ValueError) as e:
+        print(f"{e}. \nExiting...")
         exit(1)
 
     # Configuration of LLM and embedding models
