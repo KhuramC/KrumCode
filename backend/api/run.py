@@ -13,7 +13,7 @@ def start_server() -> None:
 
     uvicorn.run(
         "api.main:app",
-        host=serv_config.host,
+        host=str(serv_config.host),
         port=serv_config.port,
         reload=serv_config.development,
     )

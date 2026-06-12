@@ -3,7 +3,8 @@ from pathlib import Path
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, FilePath, ValidationError
+from pydantic import BaseModel, FilePath, ValidationError, conint
+from pydantic.networks import IPvAnyAddress
 
 
 class PathsConfig(BaseModel):
@@ -53,15 +54,16 @@ class LLMConfig(BaseModel):
 
     provider: LLMProvider
     model_name: str
-    
+
+
 class ServerConfig(BaseModel):
     """
     The configuration for the backend server.
     """
-    host: str
-    port: int
-    development: bool # whether to deploy for development or not.
-    
+
+    host: IPvAnyAddress
+    port: conint(ge=1, le=65535)
+    development: bool  # whether to deploy for development or not.
 
 
 class OverallConfig(BaseModel):
