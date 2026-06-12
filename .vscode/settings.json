@@ -1,4 +1,7 @@
 {
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
   // --- Docstring Automation ---
   "autoDocstring.docstringFormat": "google",
   "autoDocstring.generateDocstringOnEnter": true,
