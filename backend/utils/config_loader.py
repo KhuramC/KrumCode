@@ -1,10 +1,11 @@
+import logging
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field,  FilePath, ValidationError
+from pydantic import BaseModel, Field, FilePath, ValidationError
 from pydantic.networks import IPvAnyAddress
 
 
@@ -67,6 +68,31 @@ class ServerConfig(BaseModel):
     development: bool  # whether to deploy for development or not.
 
 
+class LoggingLevel(StrEnum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
+
+
+class PackageLevels(BaseModel):
+    """
+    The logging levels associated with each subdirectory/package.
+    """
+
+    api: LoggingLevel = LoggingLevel.INFO
+    rag: LoggingLevel = LoggingLevel.INFO
+    utils: LoggingLevel = LoggingLevel.WARNING
+
+
+class LoggingConfig(BaseModel):
+    """Configuration for logging."""
+
+    show_time: bool = True
+    levels: PackageLevels = PackageLevels()
+
+
 class OverallConfig(BaseModel):
     """
     The overall configuration for the RAG/backend. Given by the YAML file.
@@ -75,6 +101,7 @@ class OverallConfig(BaseModel):
     Paths: PathsConfig
     LLM: LLMConfig
     Server: ServerConfig
+    Logging: LoggingConfig
 
 
 def get_backend_root() -> Path:
@@ -139,3 +166,23 @@ def get_config() -> OverallConfig:
         return load_config()
     else:
         return _config
+
+
+def configure_logging(config: LoggingConfig) -> None:
+    """
+    Configures the logging based on the configuration.
+    """
+    log = "%(asctime)s " if config.show_time else ""
+    log += "[%(levelname)s] %(name)s: %(message)s"
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(log))
+
+    for name, level in (
+        ("api", config.levels.api),
+        ("rag", config.levels.rag),
+        ("utils", config.levels.utils),
+    ):
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
+        logger.addHandler(handler)

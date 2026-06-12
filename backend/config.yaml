@@ -11,6 +11,14 @@ Server:
   port: 8000
   development: True
 
+Logging:
+  show_time: true
+  levels:
+    api: "INFO"
+    rag: "INFO"
+    utils: "WARNING"
+
 LLM:
   provider: "groq"
   model_name: "qwen/qwen3-32b"
+
