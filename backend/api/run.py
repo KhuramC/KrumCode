@@ -7,8 +7,8 @@ def start_server() -> None:
     try:
         config = get_config()
         serv_config = config.Server
-    except (FileNotFoundError, ValueError):
-        print("Config file not found or empty. Exiting...")
+    except (FileNotFoundError, ValueError) as e:
+        print(f"{e}. \nExiting...")
         exit(1)
 
     uvicorn.run(
