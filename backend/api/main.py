@@ -8,7 +8,7 @@ from utils.config_loader import get_config
 
 from . import rest
 
-logger = logging.getLogger("api")
+logger = logging.getLogger("api.main")
 
 
 @asynccontextmanager

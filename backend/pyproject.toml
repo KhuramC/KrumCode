@@ -28,6 +28,9 @@ pydantic = "^2.13.4"
 fastapi = "^0.116.1"
 uvicorn = { extras = ["standard"], version = "^0.30.0" }
 
+# logging stuff
+colorlog = "^6.10.1"
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.0"
 pytest-asyncio = "^0.23.8"

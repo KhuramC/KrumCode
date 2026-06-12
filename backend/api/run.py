@@ -1,5 +1,9 @@
+import logging
+
 import uvicorn
 from utils.config_loader import get_config
+
+logger = logging.getLogger("api.run")
 
 
 def start_server() -> None:

@@ -12,7 +12,7 @@ Server:
   development: True
 
 Logging:
-  show_time: true
+  show_time: False
   levels:
     api: "INFO"
     rag: "INFO"

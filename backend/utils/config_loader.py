@@ -3,12 +3,14 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
 
+import colorlog
+from colorama import Fore, Style
 import yaml
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field, FilePath, ValidationError
 from pydantic.networks import IPvAnyAddress
 
-logger = logging.getLogger("utils")
+logger = logging.getLogger("utils.config_loader")
 
 
 class PathsConfig(BaseModel):
@@ -176,10 +178,10 @@ def configure_logging(config: LoggingConfig) -> None:
     Configures the logging based on the configuration.
     """
     log = "%(asctime)s " if config.show_time else ""
-    log += "[%(levelname)s] %(name)s: %(message)s"
+    log += f"%(log_color)s[%(levelname)s]%(reset)s {Fore.CYAN}%(name)s{Style.RESET_ALL}: %(message)s"
 
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter(log))
+    handler = colorlog.StreamHandler()
+    handler.setFormatter(colorlog.ColoredFormatter(log))
 
     for name, level in (
         ("api", config.levels.api),
