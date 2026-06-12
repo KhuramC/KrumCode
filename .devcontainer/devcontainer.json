@@ -23,8 +23,9 @@
         "github.vscode-github-actions",
         //javascript extensions
         "dbaeumer.vscode-eslint",
-        "rvest.vs-code-prettier-eslint",
-        "svelte.svelte-vscode"
+        "svelte.svelte-vscode",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
       ]
     }
   },
