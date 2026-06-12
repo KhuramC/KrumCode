@@ -6,11 +6,13 @@ readme = "README.md"
 packages = [
     {include = "rag" },
     {include = "utils"},
-    # {include = "api" }
+    {include = "api" }
 ]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+
+# rag stuff
 chromadb = "^1.5.9"
 llama-index-core = "^0.14.22"
 llama-index-vector-stores-chroma = "^0.5.5"
@@ -21,6 +23,10 @@ sentence-transformers = "^5.5.1"
 pyyaml = "^6.0.3"
 python-dotenv = "^1.2.2"
 pydantic = "^2.13.4"
+
+# api stuff
+fastapi = "^0.116.1"
+uvicorn = { extras = ["standard"], version = "^0.30.0" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.0"
@@ -34,6 +40,12 @@ ipywidgets = "^8.1.0"
 jupyter = "^1.1.1"
 ipykernel = "^7.2.0"
 
+# for testing FastAPI
+httpx = "^0.28.1"
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts] # defines the ability to do `poetry run server`
+server = "api.run:start_server"

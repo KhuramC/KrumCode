@@ -53,15 +53,25 @@ class LLMConfig(BaseModel):
 
     provider: LLMProvider
     model_name: str
+    
+class ServerConfig(BaseModel):
+    """
+    The configuration for the backend server.
+    """
+    host: str
+    port: int
+    development: bool # whether to deploy for development or not.
+    
 
 
 class OverallConfig(BaseModel):
     """
-    The overall configuration for the RAG. Given by the YAML file.
+    The overall configuration for the RAG/backend. Given by the YAML file.
     """
 
     Paths: PathsConfig
     LLM: LLMConfig
+    Server: ServerConfig
 
 
 def get_backend_root() -> Path:
