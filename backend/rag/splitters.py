@@ -1,8 +1,11 @@
+import logging
 from dataclasses import dataclass
 from enum import Enum
 
 from llama_index.core.node_parser import CodeSplitter, NodeParser
 from tree_sitter_languages import get_parser
+
+logger = logging.getLogger("rag.splitters")
 
 
 # TODO: Possibly change implmentation up as you add more FileSplitters
