@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -12,9 +13,12 @@ from llama_index.core.schema import BaseNode
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openai_like import OpenAILike
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from .splitters import FileSplitter
 from utils.config_loader import get_backend_root, get_config
 from utils.sync_repos import sync_repos
+
+from .splitters import FileSplitter
+
+logger = logging.getLogger("rag.ingestion")
 
 
 def ingest_file(file_path: Path) -> list[BaseNode] | None:
@@ -36,6 +40,9 @@ def ingest_file(file_path: Path) -> list[BaseNode] | None:
         None,
     )
     if config is None:
+        logger.warning(
+            f"No splitter for {file_path.suffix} files. Ingestion won't occur with {file_path}."
+        )
         return None
 
     reader = SimpleDirectoryReader(input_files=[str(file_path)])
@@ -75,11 +82,6 @@ def ingest_repos() -> None:
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
     sync_results = sync_repos()
-    failed_syncs = [result for result in sync_results if not result.success]
-    if failed_syncs:
-        print(
-            f"Warning: {len(failed_syncs)} repo(s) failed to sync: {[result.repo_name for result in failed_syncs]}"
-        )
 
     files_to_ingest = [
         Path(file)
@@ -89,7 +91,7 @@ def ingest_repos() -> None:
     ]
 
     if not files_to_ingest:
-        print("No files to ingest.")
+        logger.info("No files to ingest.")
         return
 
     all_nodes = []
@@ -98,20 +100,17 @@ def ingest_repos() -> None:
         chroma_collection.delete(where={"file_path": {"$eq": str(file_path)}})
 
         nodes = ingest_file(file_path)
-        if nodes is None:
-            # print(f"Skipping {file_path.name} — no splitter for {file_path.suffix}")
-            continue
-        all_nodes.extend(nodes)
+        if nodes:
+            all_nodes.extend(nodes)
 
     if not all_nodes:
-        print("No nodes to index.")
+        logger.warning("File founds to ingest, but no new nodes to index.")
         return
 
-    print("Indexing nodes into database...")
     VectorStoreIndex(
         nodes=all_nodes, storage_context=storage_context, show_progress=True
     )
-    print("Indexing complete! The database is ready.")
+    logging.info("Nodes successfully indexed into database.")
 
 
 if __name__ == "__main__":
